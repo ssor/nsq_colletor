@@ -74,33 +74,6 @@ func pullNsqReport(url string) map[string]int {
 	return report.Summary()
 }
 
-// func DoMongoConnStatistics(cmd string) map[string]int {
-// 	fmt.Println("[OK] start statistics ...")
-
-// 	out, err := exec.Command(cmd).Output()
-// 	if err != nil {
-// 		fmt.Println("[ERR] Command err: ", err)
-// 		return nil
-// 	}
-// 	if out != nil {
-// 		if len(out) > 500 {
-// 			fmt.Println("[OK] ", string(out)[:500])
-// 		} else {
-// 			fmt.Println("[OK] ", string(out))
-// 		}
-// 	}
-
-// 	connections, err := parser.Parse(out)
-// 	if err != nil {
-// 		fmt.Println("[ERR] parse data err: ", err)
-// 		return nil
-// 	}
-
-// 	statistics := parser.New_MongoConnectionTree().SortToTree(connections).ConnStatistics()
-// 	return statistics
-
-// }
-
 func PushStatisticsToMonitor(statistics map[string]int, endPoint, metricPrefix string) {
 	now := time.Now()
 	fmt.Println("*********** result (", now.Format(time.RFC3339), "): *************")

@@ -1,4 +1,4 @@
 {
-    "cmd": "1",
-    "endpoint":"123"
+    "url": "",
+    "endpoint": "123"
 }
