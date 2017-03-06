@@ -80,7 +80,7 @@ func PushStatisticsToMonitor(statistics map[string]int, endPoint, metricPrefix s
 	messages := []*FalconMessage{}
 	timestamp := int(now.Unix())
 	for key, count := range statistics {
-		fmt.Println("conn: ", key, " -> ", count)
+		fmt.Println("topic: ", key, " -> ", count)
 
 		msg := New_FalconMessage(endPoint, metricPrefix+key, timestamp, 60, count)
 		messages = append(messages, msg)
