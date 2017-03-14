@@ -1,6 +1,7 @@
 package parser
 
 import "encoding/json"
+import "fmt"
 
 func Parse(raw []byte) (*NsqMessageReport, error) {
 	var nmr NsqMessageReport
@@ -15,17 +16,17 @@ type NsqMessageReport struct {
 	Topics TopicArray
 }
 
-func (report *NsqMessageReport) Summary() map[string]int {
-	summary := make(map[string]int)
+func (report *NsqMessageReport) Summary() StatisticResult {
+	summary := make(StatisticResult)
 	for _, topic := range report.Topics {
-		summary[topic.Name] = topic.totalRequeueCount()
+		summary.Add(topic.Summary())
 	}
 	return summary
 }
 
-func (report *NsqMessageReport) findTopic(name string) *Topic {
-	return report.Topics.find(name)
-}
+// func (report *NsqMessageReport) findTopic(name string) *Topic {
+// 	return report.Topics.find(name)
+// }
 
 type TopicArray []*Topic
 
@@ -43,26 +44,40 @@ type Topic struct {
 	Channels ChannelArray
 }
 
-func (topic *Topic) totalRequeueCount() int {
-	total := 0
-	if topic.Channels == nil || len(topic.Channels) <= 0 {
-		return total
+func (tp *Topic) Summary() StatisticResult {
+	if tp.Channels == nil || len(tp.Channels) <= 0 {
+		return nil
 	}
-
-	for _, channel := range topic.Channels {
-		total = total + channel.RequeueCount
+	sr := make(StatisticResult)
+	for _, ch := range tp.Channels {
+		key := fmt.Sprintf("%s_%s", tp.Name, ch.ChannelName)
+		sr[key+"_deferred"] = ch.DeferredCount
+		sr[key+"_depth"] = ch.Depth
 	}
-	return total
+	return sr
 }
+
+// func (topic *Topic) totalRequeueCount() int {
+// 	total := 0
+// 	if topic.Channels == nil || len(topic.Channels) <= 0 {
+// 		return total
+// 	}
+
+// 	for _, channel := range topic.Channels {
+// 		total = total + channel.RequeueCount
+// 	}
+// 	return total
+// }
 
 type ChannelArray []*Channel
 
 type Channel struct {
-	Node         string `json:"node"`
-	HostName     string `json:"hostname"`
-	TopicName    string `json:"topic_name"`
-	ChannelName  string `json:"channel_name"`
-	RequeueCount int    `json:"requeue_count"`
+	Node          string `json:"node"`
+	HostName      string `json:"hostname"`
+	TopicName     string `json:"topic_name"`
+	ChannelName   string `json:"channel_name"`
+	DeferredCount int    `json:"deferred_count"`
+	Depth         int    `json:"depth"`
 	// Clients      ClientArray `json:"clients"`
 }
 

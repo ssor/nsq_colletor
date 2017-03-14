@@ -3,6 +3,8 @@ package parser
 import (
 	"io/ioutil"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 const (
@@ -28,19 +30,18 @@ func TestParseLog(t *testing.T) {
 		TopicName    string
 		RequeueCount int
 	}{
-		{"add_new_task_record", 0},
-		{"taskrecords_update", 1611},
+		{"add_new_task_record_ch_depth", 1},
+		{"add_new_task_record_ch_deferred", 2},
+		{"taskrecords_update_ch_depth", 10},
+		{"taskrecords_update_ch_deferred", 100},
 	}
 
 	summary := nmr.Summary()
-
+	spew.Dump(summary)
 	for _, topicTestCase := range topicTestCases {
-		topic := nmr.findTopic(topicTestCase.TopicName)
-		if topic == nil {
+		_, exists := summary[topicTestCase.TopicName]
+		if exists == false {
 			t.Fatalf("topic [%s] should exist", topicTestCase.TopicName)
-		}
-		if topic.totalRequeueCount() != topicTestCase.RequeueCount {
-			t.Fatalf("topic [%s] has %d requeue msg, but %d expected", topicTestCase.TopicName, topic.totalRequeueCount(), topicTestCase.RequeueCount)
 		}
 
 		if count, exists := summary[topicTestCase.TopicName]; exists == false {
